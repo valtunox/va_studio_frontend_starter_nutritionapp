@@ -1,0 +1,135 @@
+<<<<<<< HEAD
+# For VM deploy only: frontend uses pre-pulled image (no build). Nginx builds from ./nginx.
+services:
+  frontend:
+    container_name: studioapp-frontend-nutritionapp
+    image: ${FRONTEND_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "3069:3069"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3069/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - studioapp-net-nutritionapp
+
+  nginx:
+    container_name: studioapp-nginx-nutritionapp
+    image: ${NGINX_IMAGE:-studioapp-nginx-nutritionapp:latest}
+    restart: unless-stopped
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      args:
+        APP_PORT: 3069
+        HTTP_PORT: 80
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - app_name=studioapp-frontend-nutritionapp
+      - app_port=3069
+    volumes:
+      - ${SSL_CERTS_PATH:-./certs}:/etc/nginx/ssl:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - studioapp-net-nutritionapp
+
+networks:
+  studioapp-net-nutritionapp:
+    driver: bridge
+=======
+# For VM deploy only: frontend uses pre-pulled image (no build). Nginx builds from ./nginx.
+services:
+  frontend:
+    container_name: studioapp-frontend-nutritionapp
+    image: ${FRONTEND_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "3069:3069"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3069/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - studioapp-net-nutritionapp
+
+  nginx:
+    container_name: studioapp-nginx-nutritionapp
+    image: ${NGINX_IMAGE:-studioapp-nginx-nutritionapp:latest}
+    restart: unless-stopped
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      args:
+        APP_PORT: 3069
+        HTTP_PORT: 80
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - app_name=studioapp-frontend-nutritionapp
+      - app_port=3069
+    volumes:
+      - ${SSL_CERTS_PATH:-./certs}:/etc/nginx/ssl:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - studioapp-net-nutritionapp
+
+networks:
+  studioapp-net-nutritionapp:
+    driver: bridge
+>>>>>>> 22b0267a21511be5230e2e8a7fbb8f3f2d788d52
